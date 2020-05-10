@@ -14192,9 +14192,11 @@ The testing result further shows the hunch I had when choosing the model, which 
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer:</strong></p>
 <p>Logistic Regression is one of the most used Machine Learning algorithms for binary classification. It is a simple Algorithm easy to implement and it will do well enough in many classification tasks which is our case.</p>
-<p>Logistic Regression measures the relationship between the dependent variable (our label, what we want to predict) and the one or more independent variables (our features), by estimating probabilities using it’s underlying logistic function. These probabilities must then be transformed into binary values in order to actually make a prediction. Then the algorithm  maximize the likelihood that a random data point gets classified correctly, which yields the prediction.</p>
-<p>This algorithm does not require much tuning which is a good choice to start with in our classification problem to generate insight.</p>
-<p>Reference: <a href="https://machinelearning-blog.com/2018/04/23/logistic-regression-101/">https://machinelearning-blog.com/2018/04/23/logistic-regression-101/</a></p>
+<p>Logistic Regression measures the relationship between the dependent variable (our label, what we want to predict) and the one or more independent variables (our features), by estimating probabilities using it’s underlying logistic function. These probabilities must then be transformed into binary values in order to actually make a prediction. Then the algorithm  maximize the likelihood that a random data point gets classified correctly, which yields the prediction.<br></p>
+<p>Logistic regression boils down to use linear regression model to computes the  logarithm of odds of each label, which is a linear combinaiton of features. It then maximzes the likelihood for the overall points. It leads to probabilities of each point. If the probability is close to 1, then it is classified as positive. Otherwise, if it is closed to 0, then it is classfied as negative.  <br> 
+This algorithm does not require much tuning which is a good choice to start with in our classification problem to generate insight.</p>
+<p>Reference: <a href="https://machinelearning-blog.com/2018/04/23/logistic-regression-101/">https://machinelearning-blog.com/2018/04/23/logistic-regression-101/</a><br>
+<a href="https://en.wikipedia.org/wiki/Logistic_regression">https://en.wikipedia.org/wiki/Logistic_regression</a></p>
 
 </div>
 </div>
