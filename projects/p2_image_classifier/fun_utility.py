@@ -20,7 +20,7 @@ pa = ap.parse_args()
 where = pa.data_dir
 path = pa.save_dir
 lr = pa.learning_rate
-structure = pa.arch
+model_name = pa.arch
 dropout = pa.dropout
 epochs = pa.epochs
 
@@ -58,36 +58,45 @@ def load_data(where  = "./flowers"):
 
 
 ## set up the model
-def model_setup(structure='vgg11',dropout=dropout, lr = lr):
-    if structure == 'vgg11':
+def model_setup(model_name='vgg11',dropout=dropout, hidden_layer1 = 120, lr = lr, power='gpu'):
+    arch = {"vgg11":25088,
+        "densenet121":1024}
     
+    if model_name == 'densenet121':
+        model = models.densenet121(pretrained=True)
+        num_in_features = model.fc.in_features
+    elif model_name == 'vgg11':
         model = models.vgg11(pretrained=True)
-        for param in model.parameters():
-            param.requires_grad = False
+        num_in_features = model.classifier[0].in_features
+    else:
+        print("Unknown model...")
     
-        classifier = nn.Sequential(nn.Linear(25088, 4096),
+    
+    for param in model.parameters():
+        param.requires_grad = False
+    
+    classifier = nn.Sequential(nn.Linear(arch[structure], hidden_layer1),
                           nn.ReLU(),
                           nn.Dropout(dropout),
-                          nn.Linear(4096, 102),
+                          nn.Linear(hidden_layer1, 102),
                           nn.LogSoftmax(dim =1))
 
-        model.classifier = classifier
-        criterion = nn.NLLLoss()
-        optimizer = optim.Adam(model.classifier.parameters(), lr )
+    model.classifier = classifier
+    criterion = nn.NLLLoss()
+    optimizer = optim.Adam(model.classifier.parameters(), lr )
     
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model.to(device)
+    device = torch.device('cuda' if torch.cuda.is_available() and power == 'gpu' else 'cpu')
+    model.to(device)
     
-        return model, optimizer, criterion
-    else:
-        print('Sorry, please select vgg11 model')
-        return None 
+    return model, optimizer, criterion
+   
     
 #model, optimizer, criterion = model_setup()
 
-def train_network(model, criterion, optimizer, epochs, trainloader, validloader,  print_every=20, device='cuda'):
+def train_network(model, criterion, optimizer, epochs, trainloader, validloader,  print_every=20, power='gpu'):
     steps = 0 
     running_loss = 0
+    device = torch.device('cuda' if torch.cuda.is_available() and power == 'gpu' else 'cpu')
     for epoch in range(epochs):
         for inputs, labels in trainloader:
             steps +=1
@@ -125,10 +134,11 @@ def train_network(model, criterion, optimizer, epochs, trainloader, validloader,
 
     return model, optimizer
                 
-def test_accuracy(model, criterion, testloader, device='cuda'):
+def test_accuracy(model, criterion, testloader, power='gpu'):
     model.eval()
     test_loss = 0
     accuracy = 0
+    device = torch.device('cuda' if torch.cuda.is_available() and power == 'gpu' else 'cpu')
     with torch.no_grad():
         for inputs, labels in testloader:
             inputs, labels = inputs.to(device), labels.to(device)

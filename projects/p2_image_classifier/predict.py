@@ -21,6 +21,7 @@ ap.add_argument('--top_k', default=5, dest="top_k", action="store", type=int)
 ap.add_argument('--category_names', dest="category_names", action="store", default='cat_to_name.json')
 ap.add_argument('--dropout', dest = "dropout", action = "store", default = 0.3)
 ap.add_argument('--learning_rate', dest="learning_rate", action="store", default=0.003)
+ap.add_argument('--gpu', dest="gpu", action="store", default="gpu")
 
 pa = ap.parse_args()
 path_image = pa.input_img
@@ -30,6 +31,8 @@ input_img = pa.input_img
 path = pa.checkpoint
 lr = pa.learning_rate
 dropout = pa.dropout
+power = pa.gpu
+cat_name = pa.category_names
 
 def process_image(image):
     ''' Scales, crops, and normalizes a PIL image for a PyTorch model,
@@ -50,20 +53,24 @@ def process_image(image):
     
     return im
 
-def predict(input_img, model, topk=number_of_outputs):
+def predict(input_img, model, topk=number_of_outputs, power='gpu'):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
+    device = torch.device('cuda' if torch.cuda.is_available() and power == 'gpu' else 'cpu')
 
-
-    model.to('cpu')
+    model.to(device)
     model.eval();
     img = process_image(input_img)
     ## this is an error and checked it on the discussion board to fix it
     img = img.unsqueeze_(0)
     img = img.float()
     
-    with torch.no_grad():
-        log_prob = model.forward(img)
+    if power =='gpu':
+        with torch.no_grad():
+            log_prob = model.forward(img.cuda())
+    else:
+        with torch.no_grad():
+            log_prob = model.forward(img)
         
     prob = torch.exp(log_prob)
     
@@ -74,10 +81,10 @@ trainloader, validloader, testloader, ctx  = fun_utility.load_data()
 model, optimizer, criterion = fun_utility.load_checkpoint(dropout, lr, path)
 
 
-with open('cat_to_name.json', 'r') as f:
+with open(cat_name, 'r') as f:
     cat_to_name = json.load(f)   
     
-prob = predict(input_img, model, number_of_outputs)
+prob = predict(input_img, model, number_of_outputs, power = 'gpu')
 a = np.array(prob[0][0])
 b = [cat_to_name[str(index+1)] for index in np.array(prob[1][0])]
 

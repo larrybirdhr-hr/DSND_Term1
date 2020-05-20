@@ -7,8 +7,7 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms, models
 import numpy as np
 from PIL import Image
-#import matplotlib.pyplot as plt
-#from matplotlib.ticker import FormatStrFormatter
+
 import argparse
 
 import fun_utility
@@ -21,16 +20,20 @@ ap.add_argument('--learning_rate', dest="learning_rate", action="store", default
 ap.add_argument('--dropout', dest = "dropout", action = "store", default = 0.3)
 ap.add_argument('--epochs', dest="epochs", action="store", type=int, default=12)
 ap.add_argument('--arch', dest="arch", action="store", default="vgg11", type = str)
+ap.add_argument('--gpu', dest="gpu", action="store", default="gpu")
+ap.add_argument('--hidden_units', type=int, dest="hidden_units", action="store", default=4096)
+
 
 
 pa = ap.parse_args()
 where = pa.data_dir
 path = pa.save_dir
 lr = pa.learning_rate
-structure = pa.arch
+model_name = pa.arch
 dropout = pa.dropout
 epochs = pa.epochs
-
+hidden_layer1 = pa.hidden_units
+power = pa.gpu
 
     
 
@@ -38,15 +41,15 @@ epochs = pa.epochs
 
 trainloader, validloader, testloader, ctx = fun_utility.load_data(where)
 
-# model, optimizer, criterion = fun_utility.model_setup()
-# model, optimizer = fun_utility.train_network(model, criterion, optimizer, epochs, trainloader=trainloader, validloader= validloader)
-
-#
+# model, optimizer, criterion = fun_utility.model_setup(model_name, dropout, hidden_layer1, lr, power)
+# model, optimizer = fun_utility.train_network(model, criterion, optimizer, epochs, trainloader, validloader, power)
 
 
 
-model, optimizer, criterion = fun_utility.load_checkpoint(dropout, lr)
+
+
+model, optimizer, criterion = fun_utility.load_checkpoint(dropout, lr, path)
 model.to('cuda')
-fun_utility.test_accuracy(model, criterion, testloader)
+fun_utility.test_accuracy(model, criterion, testloader, power)
 
 
