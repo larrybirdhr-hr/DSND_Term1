@@ -5,24 +5,7 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms, models
 import numpy as np
 from PIL import Image
-import argparse
 
-ap = argparse.ArgumentParser(description='fun_utility.py')
-ap.add_argument('data_dir', nargs='*', action="store", default="./flowers/")
-ap.add_argument('--save_dir', dest="save_dir", action="store", default="./checkpoint.pth")
-ap.add_argument('--learning_rate', dest="learning_rate", action="store", default=0.003)
-ap.add_argument('--dropout', dest = "dropout", action = "store", default = 0.3)
-ap.add_argument('--epochs', dest="epochs", action="store", type=int, default=12)
-ap.add_argument('--arch', dest="arch", action="store", default="vgg11", type = str)
-
-
-pa = ap.parse_args()
-where = pa.data_dir
-path = pa.save_dir
-lr = pa.learning_rate
-model_name = pa.arch
-dropout = pa.dropout
-epochs = pa.epochs
 
 ### load all the data set
 def load_data(where  = "./flowers"):
@@ -58,7 +41,7 @@ def load_data(where  = "./flowers"):
 
 
 ## set up the model
-def model_setup(model_name='vgg11',dropout=dropout, hidden_layer1 = 120, lr = lr, power='gpu'):
+def model_setup(model_name='vgg11',dropout=0.3, hidden_layer1 = 120, lr = 0.003, power='gpu'):
     arch = {"vgg11":25088,
         "densenet121":1024}
     
@@ -75,7 +58,7 @@ def model_setup(model_name='vgg11',dropout=dropout, hidden_layer1 = 120, lr = lr
     for param in model.parameters():
         param.requires_grad = False
     
-    classifier = nn.Sequential(nn.Linear(arch[structure], hidden_layer1),
+    classifier = nn.Sequential(nn.Linear(arch[model_name], hidden_layer1),
                           nn.ReLU(),
                           nn.Dropout(dropout),
                           nn.Linear(hidden_layer1, 102),
